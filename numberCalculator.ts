@@ -31,7 +31,7 @@ class Sequence {
         let current : number;
         let correct : boolean;
         while (iterator < this.size) {
-            current = getNumber(this.getBlock(iterator));
+            current = this.getBlockValue(iterator);
             //This variable will only resolve to true if it 
             correct = (shouldBeNumber && current<=9) || (!shouldBeNumber && current >= 10 && current <=13);
             if (!correct){ //Not correct. We delete block. 
@@ -51,10 +51,13 @@ class Sequence {
     }
 
     /**
-     * Returns the block string at the requested position (0...6).
+     * Returns the actual number or operator represented by a block of genetic code
+     * A number above 9 indicates an operator.
+     * 10 = +; 11 = *; 12 = *; 13 = /
      */
-    getBlock(position : number) : string{
-        return this.sequence.substr(position*4, 4);
+    getBlockValue(position : number) : number {
+        let block : string = this.sequence.substr(position*4, 4);
+        return parseInt(block, 2);
     } 
 
     /**
@@ -76,9 +79,9 @@ class Sequence {
         let string : string = "";
         let current : number;
         while (iterator < this.size){
-            current = getNumber(this.getBlock(iterator));
+            current = this.getBlockValue(iterator);
             if (current <= 9){
-                string += string + current;
+                string += current;
             } else {
                 switch (current) {
                     case 10:
@@ -108,19 +111,11 @@ class Sequence {
 
 }
 
-/**
- * Returns the actual number or operator represented by a block of genetic code
- * A number above 9 indicates an operator. 
- * 10 = +; 11 = *; 12 = *; 13 = /
- */
-function getNumber(block : string) : number {
-    return parseInt(block, 2);
-}
-
 console.log("Basic Sequence Calculator using Genetic Algorithms");
 console.log("This program will attempt to produce sequences of the type [number] [operator] [number] [operator] [number] ... that generate the desired outcome")
 
-let test = new Sequence("000101000101010001110100100");
+let test = new Sequence("00011010001010100011101001001010");
 console.log(test.getBitcode());
-console.log("Result of evaluation of sequence " + test.sequenceString() + " is: ");
-console.log(test.evaluate());
+test.clean();
+console.log(test.getBitcode());
+console.log("Result of evaluation of sequence " + test.sequenceString() + " is: " + test.evaluate());
