@@ -40,6 +40,10 @@ class Sequence {
                 iterator++;
             }
         }
+        //Now we need to check whether the last block is an operator, and delete it too.
+        if (shouldBeNumber) {
+            this.deleteBlock(this.size - 1);
+        }
     }
     getBitcode() {
         return this.sequence;
@@ -103,7 +107,7 @@ class Sequence {
 }
 console.log("Basic Sequence Calculator using Genetic Algorithms");
 console.log("This program will attempt to produce sequences of the type [number] [operator] [number] [operator] [number] ... that generate the desired outcome");
-let test = new Sequence("00011010001010100011101001001010");
+let test = new Sequence("0001101000101010001110101111");
 console.log(test.getBitcode());
 test.clean();
 console.log(test.getBitcode());
