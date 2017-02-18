@@ -32,7 +32,7 @@ class Sequence {
         let correct : boolean;
         while (iterator < this.size) {
             current = this.getBlockValue(iterator);
-            //This variable will only resolve to true if it 
+            //This variable will only resolve to true if the current block is correct
             correct = (shouldBeNumber && current<=9) || (!shouldBeNumber && current >= 10 && current <=13);
             if (!correct){ //Not correct. We delete block. 
                 this.deleteBlock(iterator);
@@ -88,16 +88,19 @@ class Sequence {
             } else {
                 switch (current) {
                     case 10:
-                        string+="+";
+                        string+=" + ";
                         break;
                     case 11:
-                        string+="-";
+                        string+=" - ";
+                        break;
                     case 12:
-                        string+="*";
-                    case 12:
-                        string+="/";
+                        string+=" * ";
+                        break;
+                    case 13:
+                        string+=" / ";
+                        break;
                     default:
-                        console.log("Error while evaluating. Sequence not clean?");
+                        string+=" NaN ";
                 }
             }
             iterator++;
@@ -114,11 +117,23 @@ class Sequence {
 
 }
 
-console.log("Basic Sequence Calculator using Genetic Algorithms");
-console.log("This program will attempt to produce sequences of the type [number] [operator] [number] [operator] [number] ... that generate the desired outcome")
+function randomBitcode() {
+    let bitcode : string = "";
+    for (var i = 0; i < 7*4; i++) {
+        bitcode+=Math.round(Math.random()); 
+    }
+    return bitcode;
+}
 
-let test = new Sequence("0001101000101010001110101111");
-console.log(test.getBitcode());
-test.clean();
-console.log(test.getBitcode());
-console.log("Result of evaluation of sequence " + test.sequenceString() + " is: " + test.evaluate());
+function runTest(sequence : Sequence){
+    console.log("Original Bitcode: " + sequence.getBitcode() + " ==> " + sequence.sequenceString());
+    sequence.clean();
+    console.log("Cleaned Bitcode: " + sequence.getBitcode() +  " ==> " + sequence.sequenceString());
+    console.log("Result of evaluation: " + sequence.evaluate());
+}
+
+console.log("Basic Sequence Calculator using Genetic Algorithms");
+
+for (var i = 0; i < 10; i++) {
+    runTest(new Sequence(randomBitcode()));
+};
