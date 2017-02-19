@@ -10,14 +10,19 @@
  * The remaining possible blocks will be ignored.
  * 
  */
-
-class Sequence {
-    sequence : string
-    //Original size of all sequences is 7 but can be modified by clean()
-    size : number = 7;
+export default class Sequence {
+    originalSequence : string //Should remain untouched.
+    sequence : string //Actual string we will work with.
+    length : number; //May be modified by clean.
 
     constructor(sequence : string) {
+        this.originalSequence = sequence;
         this.sequence = sequence;
+        this.length = this.originalSequence.length / 4;
+        if (!Number.isInteger(this.length)){
+            console.log("ERROR, Bad sequence length")
+        }
+        this.clean();
     }
 
     /**
@@ -30,7 +35,7 @@ class Sequence {
         let iterator : number = 0;
         let current : number;
         let correct : boolean;
-        while (iterator < this.size) {
+        while (iterator < this.length) {
             current = this.getBlockValue(iterator);
             //This variable will only resolve to true if the current block is correct
             correct = (shouldBeNumber && current<=9) || (!shouldBeNumber && current >= 10 && current <=13);
@@ -45,10 +50,13 @@ class Sequence {
         }
         //Now we need to check whether the last block is an operator, and delete it too.
         if (shouldBeNumber){ //Means last one was operator
-            this.deleteBlock(this.size-1);
+            this.deleteBlock(this.length-1);
         } 
     }
 
+    /**
+     * Returns bitcode sequence string as is.
+     */
     getBitcode() : string{
         return this.sequence;
     }
@@ -72,16 +80,19 @@ class Sequence {
          * and the string from that block onwards.
          */
         let firstPart : string = this.sequence.substr(0, position*4);
-        let lastPart : string = this.sequence.substr((position+1)*4, this.size*4-1);
+        let lastPart : string = this.sequence.substr((position+1)*4, this.length*4-1);
         this.sequence = firstPart + lastPart; //Overriding sequence
-        this.size--;
+        this.length--;
     }
 
-    sequenceString(){
+    /**
+     * Returns the decrypted string corresponding to the cleaned bitcode.
+     */
+    decode(){
         let iterator : number = 0;
         let string : string = "";
         let current : number;
-        while (iterator < this.size){
+        while (iterator < this.length){
             current = this.getBlockValue(iterator);
             if (current <= 9){
                 string += current;
@@ -110,30 +121,9 @@ class Sequence {
 
     /**
      * Returns the outcome value of the sequence according to its representation
+     * Uses JS eval function, which is why we needed to clean the 
      */
     evaluate() : number {
-        return eval(this.sequenceString());
+        return eval(this.decode());
     }
-
 }
-
-function randomBitcode() {
-    let bitcode : string = "";
-    for (var i = 0; i < 7*4; i++) {
-        bitcode+=Math.round(Math.random()); 
-    }
-    return bitcode;
-}
-
-function runTest(sequence : Sequence){
-    console.log("Original Bitcode: " + sequence.getBitcode() + " ==> " + sequence.sequenceString());
-    sequence.clean();
-    console.log("Cleaned Bitcode: " + sequence.getBitcode() +  " ==> " + sequence.sequenceString());
-    console.log("Result of evaluation: " + sequence.evaluate());
-}
-
-console.log("Basic Sequence Calculator using Genetic Algorithms");
-
-for (var i = 0; i < 10; i++) {
-    runTest(new Sequence(randomBitcode()));
-};
