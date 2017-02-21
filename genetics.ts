@@ -8,6 +8,8 @@ export default class Genetics {
     population : Sequence[];
     bits : number;
     crossoverRate : number = 0.7 //DEFAULT
+    mutationRate : number = 0.001 //DEFAULT
+    popSize : numebr;
 
     /**
      * Build an initial population with indicated size and random bitcodes.
@@ -29,8 +31,30 @@ export default class Genetics {
         return bitcode;
     }
 
-    private randomCrossoverPoint(){
-        Math.round(Math.random()*this.bits);
+    private randomCrossoverPoint() : number{
+        return Math.round(Math.random()*this.bits);
     }
+
+    private swap(seq1 : Sequence, seq2 : Sequence) {
+        
+    }
+
+    public setCrossoverRate(rate : number){
+        this.crossoverRate = rate;
+    }
+
+    public nextGen(){
+        for (var i = 0; i < this.population.length; i=i+2) {
+            if (Math.random() <= this.crossoverRate){
+                this.population[i].recode(this.population[i+1].getSubstring(this.randomCrossoverPoint()));
+            }
+
+            if (Math.random() <= this.mutationRate) {
+                this.population[i].mutate();
+            } 
+        } 
+    }
+
+    
 
 }
