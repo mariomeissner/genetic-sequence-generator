@@ -5,21 +5,24 @@ import Sequence from "./sequence.js";
  * 
  */
 export default class Genetics {
-    population : Sequence[];
-    bits : number;
-    crossoverRate : number = 0.7 //DEFAULT
-    mutationRate : number = 0.001 //DEFAULT
-    popSize : numebr;
+    private population : Sequence[];
+    private fitness : number[];
+    private bits : number;
+    private crossoverRate : number = 0.7 //DEFAULT
+    private mutationRate : number = 0.001 //DEFAULT
+    private popSize : number;
+    private target : number;
 
     /**
      * Build an initial population with indicated size and random bitcodes.
      * @param popSize Size of the population
      * @param numOfBlocks Number of blocks (numbers and operators, 4 bits each) per sequence
      */
-    constructor(popSize : number, bits : number){
+    constructor(popSize : number, bits : number, target : number){
         for (var i = 0; i < popSize; i++) {
             this.population[i] = new Sequence(this.randomBitcode(bits));
             this.bits = bits;
+            this.target = target;
         }
     }
 
@@ -32,11 +35,7 @@ export default class Genetics {
     }
 
     private randomCrossoverPoint() : number{
-        return Math.round(Math.random()*this.bits);
-    }
-
-    private swap(seq1 : Sequence, seq2 : Sequence) {
-        
+        return Math.floor(Math.random()*this.bits);
     }
 
     public setCrossoverRate(rate : number){
@@ -53,6 +52,18 @@ export default class Genetics {
                 this.population[i].mutate();
             } 
         } 
+    }
+
+    public print(){
+        this.population.forEach(element => {
+            console.log(element.getBitcode() + " ==> " + element.evaluate())
+        });
+    }
+
+    public evaluate() {
+        for (var i = 0; i < this.population.length; i++) {
+            this.fitness[i] = 1 / Math.abs(this.target - this.population[i].evaluate());
+        }
     }
 
     

@@ -11,7 +11,7 @@
  * 
  */
 export default class Sequence {
-    public bitcode : string //Should remain untouched.
+    private bitcode : string //Should remain untouched.
     private cleanedBitcode : string //Actual string we will work with.
     length : number; //May be modified by clean.
 
@@ -22,7 +22,7 @@ export default class Sequence {
         if (!Number.isInteger(this.length)){
             console.log("ERROR, Bad sequence length")
         }
-        this.clean();
+        this.clean();  //For convenience
     }
 
     /**
@@ -74,7 +74,7 @@ export default class Sequence {
      * Returns bitcode sequence string as is.
      */
     public getBitcode() : string{
-        return this.cleanedBitcode;
+        return this.bitcode;
     }
 
     /**
@@ -146,5 +146,9 @@ export default class Sequence {
         let pos : number = Math.floor(Math.random()*this.bitcode.length);
         let bit : String = this.bitcode.charAt(pos);
         this.bitcode = this.bitcode.substr(0, pos) + bit + this.bitcode.substr(pos+1);
+    }
+
+    public fitness(target : number) : number {
+        return 1/
     }
 }

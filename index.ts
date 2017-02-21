@@ -1,9 +1,5 @@
-import Sequence from "./sequence";
-
-
-
-function runTest(sequence : Sequence){
-    console.log("Original Bitcode: " + sequence.getBitcode() + " ==> " + sequence.decode());
-    console.log("Cleaned Bitcode: " + sequence.getBitcode() +  " ==> " + sequence.decode());
-    console.log("Result of evaluation: " + sequence.evaluate());
-}
+import Sequence from "./sequence.js";
+import Genetics from "./genetics.js"
+let genetics : Genetics = new Genetics(40, 7*4, 400);
+genetics.evaluate();
+genetics.print();
