@@ -149,6 +149,6 @@ export default class Sequence {
     }
 
     public fitness(target : number) : number {
-        return 1/
+        return 1/Math.abs(target - this.evaluate());
     }
 }

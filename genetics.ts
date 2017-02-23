@@ -43,6 +43,7 @@ export default class Genetics {
     }
 
     public nextGen(){
+        /**
         for (var i = 0; i < this.population.length; i=i+2) {
             if (Math.random() <= this.crossoverRate){
                 this.population[i].recode(this.population[i+1].getSubstring(this.randomCrossoverPoint()));
@@ -52,6 +53,15 @@ export default class Genetics {
                 this.population[i].mutate();
             } 
         } 
+        */
+
+        let total = 0;
+        for (var i = 0; i < this.population.length; i++){
+            total += this.population[i].fitness(this.target);
+            
+        }
+
+
     }
 
     public print(){
