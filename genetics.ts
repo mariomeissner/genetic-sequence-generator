@@ -1,4 +1,4 @@
-import Sequence from "./sequence.js";
+import Sequence from "./sequence";
 /**
  * Manages the populations of a sequence. 
  * Has the necessary methods to observe the current population, and create a new generation based on set parameters. 
@@ -8,8 +8,8 @@ export default class Genetics {
     private population : Sequence[];
     private fitness : number[];
     private bits : number;
-    private crossoverRate : number = 0.7 //DEFAULT
-    private mutationRate : number = 0.001 //DEFAULT
+    private crossoverRate : number = 0.4 //DEFAULT
+    private mutationRate : number = 0.02 //DEFAULT
     private popSize : number;
     private target : number;
 
