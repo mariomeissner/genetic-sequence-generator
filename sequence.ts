@@ -11,17 +11,18 @@
  * 
  */
 export default class Sequence {
-    private bitcode : string //Should remain untouched.
-    private cleanedBitcode : string //Actual string we will work with.
+    public bitcode : string //Should remain untouched.
+    private cleanBitcode : string //Actual string we will work with.
     length : number; //May be modified by clean.
 
     constructor(sequence : string) {
         this.bitcode = sequence;
-        this.cleanedBitcode = sequence;
+        this.cleanBitcode = sequence;
         this.length = this.bitcode.length / 4;
         if (!Number.isInteger(this.length)){
             console.log("ERROR, Bad sequence length")
         }
+        //Call to update cleanBitcode by cleaning the original
         this.clean();  //For convenience
     }
 
@@ -55,40 +56,17 @@ export default class Sequence {
     }
 
     /**
-     * Deletes a block of 4 bits of the sequence at indicated position, shifting the rest to the left.
-     */
-    private deleteBlock(position : number) : void {
-        /**
-         * We will create two substrings: The string until the block to be deleted,
-         * and the string from that block onwards (not included, obviously).
-         */
-        let firstPart : string = this.cleanedBitcode.substr(0, position*4);
-        let lastPart : string = this.cleanedBitcode.substr((position+1)*4, this.length*4-1);
-        this.cleanedBitcode = firstPart + lastPart; //Overriding sequence
-        this.length--;
-    }
-
-    /**
-     * POSSIBLY UNNECESSARY SINCE ORIGINAL BITCODE NOW PUBLIC
-     * DO WE NEED TO SHOW CLEANED BITCODE?
-     * Returns bitcode sequence string as is.
-     */
-    public getBitcode() : string{
-        return this.bitcode;
-    }
-
-    /**
-     * Returns the actual number or operator represented by a block of genetic code
+     * Returns the actual number or operator represented by the block at the indicated position
      * A number above 9 indicates an operator.
      * 10 = +; 11 = *; 12 = *; 13 = /
      */
     public getBlockValue(position : number) : number {
-        let block : string = this.cleanedBitcode.substr(position*4, 4);
+        let block : string = this.cleanBitcode.substr(position*4, 4);
         return parseInt(block, 2);
     }
 
     /**
-     * Returns the decrypted string corresponding to the cleaned bitcode.
+     * Returns the decoded string corresponding to the cleaned bitcode.
      */
     public decode(){
         let iterator : number = 0;
@@ -129,26 +107,52 @@ export default class Sequence {
         return eval(this.decode());
     }
 
-
-    public recode(subSeq : String) : void{
-        if (this.bitcode.length > subSeq.length){
-            let pos = this.bitcode.length - subSeq.length;
-            this.bitcode = this.bitcode.substring(0, pos) + subSeq;
+    /**
+     * Returns a new sequence consisting of the original until the last subseq.lengh characters,
+     * which will have been replaced by subsec.
+     * @param subSeq Subsequence replacing the tail of this sequence
+     */
+    public recode(subSeq : String) : String{
+        if (this.bitcode.length <= subSeq.length){
+            throw new Error("Bitcode index out of bounds");
         }
+        let pos = this.bitcode.length - subSeq.length;
+        return this.bitcode.substring(0, pos) + subSeq;
+    }
 
+    public mutate() : String {
+        //We take a random position
+        let pos : number = Math.floor(Math.random()*this.bitcode.length);
+        let bit : String = this.bitcode.charAt(pos);
+        if (bit == "0") bit = "1" 
+        else bit = "0";
+        return this.bitcode.substr(0, pos) + bit + this.bitcode.substr(pos+1);
+    }
+
+    /*
+    SHOULD BE DELETED?
+    public fitness(target : number) : number {
+        return 1/Math.abs(target - this.evaluate());
+    }
+    */
+
+    //FROM HERE ONWARDS AUXILIARY FUNCTIONS//
+
+    /**
+     * Deletes a block of 4 bits of the sequence at indicated position, shifting the rest to the left.
+     */
+    private deleteBlock(position : number) : void {
+        /**
+         * We will create two substrings: The string until the block to be deleted,
+         * and the string from that block onwards (not included, obviously).
+         */
+        let firstPart : string = this.cleanBitcode.substr(0, position*4);
+        let lastPart : string = this.cleanBitcode.substr((position+1)*4, this.length*4-1);
+        this.cleanBitcode = firstPart + lastPart; //Overriding sequence
+        this.length--;
     }
 
     public getSubstring(pos : number){
         return this.bitcode.substring(pos);
-    }
-
-    public mutate() : void {
-        let pos : number = Math.floor(Math.random()*this.bitcode.length);
-        let bit : String = this.bitcode.charAt(pos);
-        this.bitcode = this.bitcode.substr(0, pos) + bit + this.bitcode.substr(pos+1);
-    }
-
-    public fitness(target : number) : number {
-        return 1/Math.abs(target - this.evaluate());
     }
 }
