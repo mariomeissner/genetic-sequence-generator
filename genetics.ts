@@ -1,4 +1,5 @@
 import Sequence from "./sequence";
+import { assert } from "./assert";
 /**
  * Manages the populations of a sequence. 
  * Has the necessary methods to observe the current population, and create a new generation based on set parameters. 
@@ -6,73 +7,110 @@ import Sequence from "./sequence";
  */
 export default class Genetics {
     private population : Sequence[];
+    /*
+    Fitness of the current population.
+    Gets updated by the constructor, and by nextGen().
+    */
     private fitness : number[];
-    private bits : number;
-    private crossoverRate : number = 0.4 //DEFAULT
-    private mutationRate : number = 0.02 //DEFAULT
+    private totalFitness : number; //Sum of fitnessess, used by select().
+    private crossoverRate : number; //DEFAULT
+    private mutationRate : number; //DEFAULT
     private popSize : number;
+    private seqSize : number; //In bits
     private target : number;
 
-    /**
-     * Build an initial population with indicated size and random bitcodes.
-     * @param popSize Size of the population
-     * @param numOfBlocks Number of blocks (numbers and operators, 4 bits each) per sequence
-     */
-    constructor(popSize : number, bits : number, target : number){
+    
+    constructor(popSize : number, seqSize : number, target : number, crossOverRate : number, mutationRate : number){
+        this.seqSize = seqSize;
+        this.popSize = popSize;
+        this.target = target;
+        this.crossoverRate = crossOverRate;
+        this.population = new Array(popSize);
+        this.fitness = new Array(popSize);
+        this.totalFitness = 0;
         for (var i = 0; i < popSize; i++) {
-            this.population[i] = new Sequence(this.randomBitcode(bits));
-            this.bits = bits;
-            this.target = target;
+            this.population[i] = new Sequence(this.randomBitcode()); 
+            this.fitness[i] = this.population[i].fitness(target);
+            assert(this.fitness[i] >= 0 && this.fitness[i] < 10, "Incorrect fitness value");
+            this.totalFitness += this.population[i].fitness(target);
         }
     }
 
-    private randomBitcode(numOfBlocks : number) {
+    private randomBitcode() {
         let bitcode : string = "";
-        for (var i = 0; i < numOfBlocks; i++) {
+        for (var i = 0; i < this.seqSize * 4; i++) {
             bitcode+=Math.round(Math.random()); 
         }
         return bitcode;
     }
 
     private randomCrossoverPoint() : number{
-        return Math.floor(Math.random()*this.bits);
-    }
-
-    public setCrossoverRate(rate : number){
-        this.crossoverRate = rate;
+        return Math.floor(Math.random()*this.seqSize);
     }
 
     public nextGen(){
-        /**
-        for (var i = 0; i < this.population.length; i=i+2) {
+        /* Auxiliary loop variables */
+        
+        let cross : number;
+        let substring : String;
+        let newPopulation : Sequence[] = new Array(this.popSize);
+        for(var i = 0; i<this.popSize; i++) {
+            /*
+            We cross the strings at a given point to create two new strings,
+            consisting of the start of the one and the end of another, respectively.
+            */
             if (Math.random() <= this.crossoverRate){
-                this.population[i].recode(this.population[i+1].getSubstring(this.randomCrossoverPoint()));
+                cross = this.randomCrossoverPoint();
+                substring = this.select().getSubstring(cross);
+                newPopulation[i] = this.select().recode(substring);
+            } else {
+                newPopulation[i] = this.select();
             }
 
             if (Math.random() <= this.mutationRate) {
-                this.population[i].mutate();
-            } 
-        } 
-        */
+                newPopulation[i] = newPopulation[i].mutate(); 
+            }
+        }
 
-        let total = 0;
-        for (var i = 0; i < this.population.length; i++){
-            total += this.population[i].fitness(this.target);
-            
+        this.population = newPopulation;
+
+        /*
+        Now we need to recalculate fitnesses.
+        */
+        this.totalFitness = 0;
+        for (let i = 0; i < this.popSize; i++){
+            this.fitness[i] = this.population[i].fitness(this.target);
+            this.totalFitness += this.fitness[i];
         }
 
 
     }
 
+    /**
+     * Selects an element of the population based on roulette wheel selection.
+     */
+    private select() : Sequence{
+        let value : number = Math.random()*this.totalFitness;
+        let pos = 0;
+        for(pos; pos < this.popSize; pos++){
+            value -= this.fitness[pos];
+            if(value <= 0) return this.population[pos];
+        }
+        return this.population[pos];
+        
+    }
     public print(){
         this.population.forEach(element => {
-            console.log(element.getBitcode() + " ==> " + element.evaluate())
+            console.log(element.bitcode + " ==> " + element.evaluate());
         });
+        console.log("--------- Total fitness: " + this.totalFitness);
     }
 
-    public evaluate() {
-        for (var i = 0; i < this.population.length; i++) {
-            this.fitness[i] = 1 / Math.abs(this.target - this.population[i].evaluate());
+    public state(){
+        console.log("Population state:");
+        console.log(this.totalFitness);
+        for (var i = 0; i < this.popSize; i+=20) {
+            console.log(this.population[i].bitcode + " ==> " + this.population[i].evaluate());
         }
     }
 

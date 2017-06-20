@@ -15,8 +15,8 @@ class Sequence {
     constructor(sequence) {
         this.bitcode = sequence;
         this.cleanBitcode = sequence;
-        this.length = this.bitcode.length / 4;
-        if (!Number.isInteger(this.length)) {
+        this.numBlocks = this.bitcode.length / 4;
+        if (!Number.isInteger(this.numBlocks)) {
             console.log("ERROR, Bad sequence length");
         }
         //Call to update cleanBitcode by cleaning the original
@@ -32,7 +32,7 @@ class Sequence {
         let iterator = 0;
         let current;
         let correct;
-        while (iterator < this.length) {
+        while (iterator < this.numBlocks) {
             current = this.getBlockValue(iterator);
             //This variable will only resolve to true if the current block is correct
             correct = (shouldBeNumber && current <= 9) || (!shouldBeNumber && current >= 10 && current <= 13);
@@ -48,7 +48,7 @@ class Sequence {
         }
         //Now we need to check whether the last block is an operator, and delete it too.
         if (shouldBeNumber) {
-            this.deleteBlock(this.length - 1);
+            this.deleteBlock(this.numBlocks - 1);
         }
     }
     /**
@@ -67,7 +67,7 @@ class Sequence {
         let iterator = 0;
         let string = "";
         let current;
-        while (iterator < this.length) {
+        while (iterator < this.numBlocks) {
             current = this.getBlockValue(iterator);
             if (current <= 9) {
                 string += current;
@@ -107,28 +107,40 @@ class Sequence {
      * @param subSeq Subsequence replacing the tail of this sequence
      */
     recode(subSeq) {
-        if (this.bitcode.length <= subSeq.length) {
+        if (this.bitcode.length < subSeq.length) {
             throw new Error("Bitcode index out of bounds");
         }
         let pos = this.bitcode.length - subSeq.length;
-        return this.bitcode.substring(0, pos) + subSeq;
+        return new Sequence(this.bitcode.substring(0, pos) + subSeq);
     }
     mutate() {
         //We take a random position
         let pos = Math.floor(Math.random() * this.bitcode.length);
+        /*
+        Now we take the bit at that position and change it to the opposite,
+        this is the mutation.
+        */
         let bit = this.bitcode.charAt(pos);
         if (bit == "0")
             bit = "1";
         else
             bit = "0";
-        return this.bitcode.substr(0, pos) + bit + this.bitcode.substr(pos + 1);
+        return new Sequence(this.bitcode.substr(0, pos) + bit + this.bitcode.substr(pos + 1));
     }
-    /*
-    SHOULD BE DELETED?
-    public fitness(target : number) : number {
-        return 1/Math.abs(target - this.evaluate());
+    /**
+     * Returns the fitness based on the distance between the current value,
+     * and the target value we are aiming to achieve.
+     * @param target Number the sequence is aiming for
+     */
+    fitness(target) {
+        let fitness = 1.0 / Math.abs(target - this.evaluate());
+        if (isFinite(fitness) && !isNaN(fitness)) {
+            return fitness;
+        }
+        else {
+            return 0;
+        }
     }
-    */
     //FROM HERE ONWARDS AUXILIARY FUNCTIONS//
     /**
      * Deletes a block of 4 bits of the sequence at indicated position, shifting the rest to the left.
@@ -139,9 +151,9 @@ class Sequence {
          * and the string from that block onwards (not included, obviously).
          */
         let firstPart = this.cleanBitcode.substr(0, position * 4);
-        let lastPart = this.cleanBitcode.substr((position + 1) * 4, this.length * 4 - 1);
+        let lastPart = this.cleanBitcode.substr((position + 1) * 4, this.numBlocks * 4 - 1);
         this.cleanBitcode = firstPart + lastPart; //Overriding sequence
-        this.length--;
+        this.numBlocks--;
     }
     getSubstring(pos) {
         return this.bitcode.substring(pos);
@@ -149,3 +161,4 @@ class Sequence {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Sequence;
+//# sourceMappingURL=sequence.js.map

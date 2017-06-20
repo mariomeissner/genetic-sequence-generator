@@ -1,7 +1,8 @@
 "use strict";
-const sequence_1 = require("./sequence");
-let sequence = new sequence_1.default("0000000000000000000000000000");
-let sequence2 = new sequence_1.default("1111111111111111111111111111");
-console.log(sequence.evaluate());
-console.log(sequence.mutate());
-console.log(sequence2.mutate());
+const genetics_1 = require("./genetics");
+let gen = new genetics_1.default(200, 7, 5000, 0.4, 0.3);
+for (let i = 0; i < 400; i++) {
+    gen.nextGen();
+    gen.state();
+}
+//# sourceMappingURL=index.js.map

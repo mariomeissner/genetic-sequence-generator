@@ -1,6 +1,8 @@
 import Sequence from "./sequence";
-let sequence : Sequence = new Sequence("0000000000000000000000000000");
-let sequence2 : Sequence = new Sequence("1111111111111111111111111111");
-console.log(sequence.evaluate());
-console.log(sequence.mutate());
-console.log(sequence2.mutate());
+import Genetics from "./genetics";
+let gen = new Genetics(200, 7, 5000, 0.4, 0.3);
+
+for (let i = 0; i<400; i++){
+    gen.nextGen();
+    gen.state();
+}
